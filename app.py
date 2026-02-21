@@ -5,6 +5,7 @@
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
+import json
 from checker import NarrativeChecker
 from database import init_db, save_result, get_history
 
@@ -20,67 +21,121 @@ checker = NarrativeChecker()
 
 @app.route('/', methods=['GET'])
 def index():
-    """Home page - narrative input form."""
     return render_template('index.html')
 
 
 @app.route('/check', methods=['POST'])
-def check_narrative():
-    """Process submitted narrative and return QC results."""
-    narrative_text = request.form.get('narrative', '').strip()
+def check():
+    narrative = request.form.get('narrative', '').strip()
     case_id = request.form.get('case_id', 'CASE-001').strip()
-    product_name = request.form.get('product_name', '').strip()
+    agency = request.form.get('agency', 'EMA').strip()
 
-    if not narrative_text:
+    if not narrative:
         return redirect(url_for('index'))
 
-    # Run the quality check
-    results = checker.check(narrative_text, product_name)
+    # Run quality check
+    result = checker.check(narrative, case_id=case_id, agency=agency)
 
-    # Save to audit history
-    save_result(case_id, product_name, narrative_text, results)
+    # Save to database
+    save_result(result)
 
-    return render_template('results.html',
-                           results=results,
-                           narrative=narrative_text,
-                           case_id=case_id,
-                           product_name=product_name)
+    return render_template('results.html', result=result)
 
 
-@app.route('/history', methods=['GET'])
+@app.route('/history')
 def history():
-    """Audit trail page showing all past QC checks."""
     records = get_history()
     return render_template('history.html', records=records)
 
 
-@app.route('/api/check', methods=['POST'])
-def api_check():
-    """JSON API endpoint for programmatic access."""
-    data = request.get_json()
-    if not data or 'narrative' not in data:
-        return jsonify({'error': 'No narrative provided'}), 400
+@app.route('/dashboard')
+def dashboard():
+    import sqlite3
+    from collections import Counter
 
-    narrative_text = data['narrative']
-    product_name = data.get('product_name', '')
-    results = checker.check(narrative_text, product_name)
-    return jsonify(results)
+    db_path = 'narrativeiq.db'
+    recent_cases = []
+    stats = {'total_cases': 0, 'avg_score': 0, 'grade_a_count': 0, 'fail_count': 0}
+    trend_labels, trend_scores = [], []
+    grade_labels, grade_counts = [], []
+    missing_labels, missing_counts = [], []
+    hist_data = [0, 0, 0, 0, 0]
+
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        # Recent cases
+        cur.execute("SELECT * FROM results ORDER BY created_at DESC LIMIT 20")
+        rows = cur.fetchall()
+        recent_cases = [dict(r) for r in rows]
+
+        if recent_cases:
+            scores = [r['score'] for r in recent_cases]
+            stats['total_cases'] = len(recent_cases)
+            stats['avg_score'] = round(sum(scores) / len(scores), 1)
+            stats['grade_a_count'] = sum(1 for r in recent_cases if r.get('grade') == 'A')
+            stats['fail_count'] = sum(1 for r in recent_cases if r.get('score', 100) < 60)
+
+            # Trend (oldest to newest)
+            ordered = list(reversed(recent_cases))
+            trend_labels = [r['case_id'] for r in ordered]
+            trend_scores = [r['score'] for r in ordered]
+
+            # Grade distribution
+            grade_counter = Counter(r.get('grade', 'N/A') for r in recent_cases)
+            grade_labels = list(grade_counter.keys())
+            grade_counts = list(grade_counter.values())
+
+            # Score histogram buckets: 0-20, 21-40, 41-60, 61-80, 81-100
+            for s in scores:
+                if s <= 20: hist_data[0] += 1
+                elif s <= 40: hist_data[1] += 1
+                elif s <= 60: hist_data[2] += 1
+                elif s <= 80: hist_data[3] += 1
+                else: hist_data[4] += 1
+
+            # Missing elements frequency
+            all_missing = []
+            for r in recent_cases:
+                try:
+                    failed = json.loads(r.get('checks_failed', '[]'))
+                    all_missing.extend([c.get('element', '') for c in failed])
+                except Exception:
+                    pass
+            missing_counter = Counter(all_missing).most_common(8)
+            missing_labels = [m[0] for m in missing_counter]
+            missing_counts = [m[1] for m in missing_counter]
+
+        conn.close()
+    except Exception as e:
+        print(f'[Dashboard] DB error: {e}')
+
+    return render_template(
+        'dashboard.html',
+        stats=stats,
+        recent_cases=recent_cases,
+        trend_labels=trend_labels,
+        trend_scores=trend_scores,
+        grade_labels=grade_labels,
+        grade_counts=grade_counts,
+        missing_labels=missing_labels,
+        missing_counts=missing_counts,
+        hist_data=hist_data
+    )
 
 
-@app.route('/clear_history', methods=['POST'])
-def clear_history():
-    """Clear audit history."""
-    from database import clear_all
-    clear_all()
-    return redirect(url_for('history'))
+@app.route('/api/history')
+def api_history():
+    records = get_history()
+    return jsonify(records)
 
 
 if __name__ == '__main__':
-    print("")
-    print("========================================")
-    print(" NarrativeIQ - ICSR Quality Checker")
-    print(" Local AI-Powered PV Tool")
-    print(" http://localhost:5000")
-    print("========================================")
-    print("")
-    app.run(debug=False, host='127.0.0.1', port=5000)
+    print('\n' + '='*40)
+    print(' NarrativeIQ - ICSR Quality Checker')
+    print(' Local AI-Powered PV Tool')
+    print(' http://localhost:5000')
+    print('='*40 + '\n')
+    app.run(debug=False, host='0.0.0.0', port=5000)
