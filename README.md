@@ -42,10 +42,12 @@ NarrativeIQ evaluates each narrative for 10 mandatory clinical elements:
 ## Installation
 
 ### Prerequisites
+
 - Python 3.9 or higher
 - pip (Python package manager)
 
 ### Quick Start
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/drbipinbhagath/NarrativeIQ.git
@@ -68,6 +70,7 @@ NarrativeIQ evaluates each narrative for 10 mandatory clinical elements:
 ## Contributing
 
 Contributions are welcome! If you have suggestions for new quality rules or PV-specific features:
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/YourFeature`)
 3. Commit your changes (`git commit -m 'Add YourFeature'`)
@@ -83,13 +86,5 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 ---
 
 ## Author
-
-**[Dr. Bipin Chandra Bhagath](https://www.linkedin.com/in/drbipinchandrabhagath/)**
-Senior Pharmacovigilance Physician | AI in PV Enthusiast
-GitHub: [@drbipinbhagath](https://github.com/drbipinbhagath)
-
----
-
-## Disclaimer
-
-This tool is intended for educational and quality improvement purposes within pharmacovigilance workflows. It does not constitute regulatory or legal advice. Always follow your organisation's SOPs and applicable regulatory guidelines for ICSR processing and submission.
+**Dr Bipin Chandra Bhagath** - *Senior PV Physician-AI & Technology Projects*  
+[LinkedIn Profile](https://www.linkedin.com/in/drbipinchandrabhagath/)
