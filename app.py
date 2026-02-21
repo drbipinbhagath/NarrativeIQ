@@ -66,29 +66,30 @@ def dashboard():
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
 
-        # Recent cases
-        cur.execute("SELECT * FROM results ORDER BY created_at DESC LIMIT 20")
+        # Use correct table name: qc_history
+        cur.execute("SELECT * FROM qc_history ORDER BY id DESC LIMIT 20")
         rows = cur.fetchall()
         recent_cases = [dict(r) for r in rows]
 
         if recent_cases:
-            scores = [r['score'] for r in recent_cases]
+            # Use correct field names from qc_history table
+            scores = [r.get('overall_score', 0) for r in recent_cases]
             stats['total_cases'] = len(recent_cases)
             stats['avg_score'] = round(sum(scores) / len(scores), 1)
             stats['grade_a_count'] = sum(1 for r in recent_cases if r.get('grade') == 'A')
-            stats['fail_count'] = sum(1 for r in recent_cases if r.get('score', 100) < 60)
+            stats['fail_count'] = sum(1 for r in recent_cases if r.get('overall_score', 100) < 60)
 
-            # Trend (oldest to newest)
+            # Score trend (oldest to newest)
             ordered = list(reversed(recent_cases))
-            trend_labels = [r['case_id'] for r in ordered]
-            trend_scores = [r['score'] for r in ordered]
+            trend_labels = [r.get('case_id', '') for r in ordered]
+            trend_scores = [r.get('overall_score', 0) for r in ordered]
 
             # Grade distribution
             grade_counter = Counter(r.get('grade', 'N/A') for r in recent_cases)
             grade_labels = list(grade_counter.keys())
             grade_counts = list(grade_counter.values())
 
-            # Score histogram buckets: 0-20, 21-40, 41-60, 61-80, 81-100
+            # Score histogram
             for s in scores:
                 if s <= 20: hist_data[0] += 1
                 elif s <= 40: hist_data[1] += 1
@@ -96,21 +97,36 @@ def dashboard():
                 elif s <= 80: hist_data[3] += 1
                 else: hist_data[4] += 1
 
-            # Missing elements frequency
+            # Most frequently missing elements
             all_missing = []
             for r in recent_cases:
                 try:
-                    failed = json.loads(r.get('checks_failed', '[]'))
-                    all_missing.extend([c.get('element', '') for c in failed])
+                    failed_raw = r.get('failed_elements', '[]') or '[]'
+                    failed = json.loads(failed_raw)
+                    if isinstance(failed, list):
+                        for item in failed:
+                            if isinstance(item, dict):
+                                all_missing.append(item.get('element', str(item)))
+                            else:
+                                all_missing.append(str(item))
                 except Exception:
                     pass
             missing_counter = Counter(all_missing).most_common(8)
             missing_labels = [m[0] for m in missing_counter]
             missing_counts = [m[1] for m in missing_counter]
 
+            # Map field names for template compatibility
+            for r in recent_cases:
+                r['score'] = r.get('overall_score', 0)
+                r['passed'] = r.get('passed_checks', 0)
+                r['failed'] = r.get('failed_checks', 0)
+                r['created_at'] = r.get('created_at', '')
+
         conn.close()
     except Exception as e:
-        print(f'[Dashboard] DB error: {e}')
+        print(f'[Dashboard] Error: {e}')
+        import traceback
+        traceback.print_exc()
 
     return render_template(
         'dashboard.html',
