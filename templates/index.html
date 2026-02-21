@@ -22,8 +22,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link active" href="/"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="/history"><i class="bi bi-clock-history me-1"></i>Audit History</a></li>
-                <li class="nav-item"><a class="nav-link text-info fw-bold" href="/dashboard"><i class="bi bi-graph-up me-1"></i>Analytics Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-graph-up me-1"></i>Analytics Dashboard</a></li>
             </ul>
         </div>
     </div>
@@ -34,39 +33,38 @@
         <!-- Checker Form -->
         <div class="col-12">
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h5 class="mb-0 fw-bold text-dark">
-                        <i class="bi bi-pencil-square me-2 text-primary"></i>
-                        New ICSR Quality Check
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold text-primary">
+                        <i class="bi bi-pencil-square me-2"></i>ICSR Narrative Quality Check
                     </h5>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body">
                     <form action="/check" method="POST">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">CASE ID</label>
-                                <input type="text" name="case_id" class="form-control form-control-lg border-2" placeholder="CASE-001" value="CASE-001" required>
+                                <label for="case_id" class="form-label fw-bold">Case Identifier</label>
+                                <input type="text" class="form-control" id="case_id" name="case_id" value="CASE-2024-001" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">AGENCY FORMAT</label>
-                                <select name="agency" class="form-select form-select-lg border-2">
+                                <label for="agency" class="form-label fw-bold">Regulatory Agency</label>
+                                <select class="form-select" id="agency" name="agency">
                                     <option value="EMA">EMA (GVP Module VI)</option>
                                     <option value="FDA">FDA (CFR 312.32)</option>
-                                    <option value="MHRA">MHRA (UK PV)</option>
+                                    <option value="MHRA">MHRA (UK)</option>
+                                    <option value="PMDA">PMDA (Japan)</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">CASE NARRATIVE TEXT</label>
-                            <textarea name="narrative" class="form-control border-2 shadow-none" rows="10" 
-                                placeholder="Paste ICSR narrative here..." required
-                                style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 0.95rem;"></textarea>
+                            <label for="narrative" class="form-label fw-bold">Case Narrative (Paste Below)</label>
+                            <textarea class="form-control" id="narrative" name="narrative" rows="12" placeholder="Paste the safety narrative here..." required></textarea>
+                            <div class="form-text text-muted">Minimum 50 words recommended for accurate NLP analysis.</div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
-                                <i class="bi bi-play-fill me-2"></i>Run Quality Check
-                            </button>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="reset" class="btn btn-outline-secondary px-4">Clear Form</button>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold">
+                                <i class="bi bi-lightning-charge-fill me-1"></i>Run Quality Check
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -74,10 +72,10 @@
         </div>
     </div>
 
-    <!-- Quick Help / Compliance Guide -->
+    <!-- Info Section -->
     <div class="row mb-5">
-        <div class="col-md-12">
-            <div class="card border-0 bg-dark text-white shadow-sm p-4">
+        <div class="col-12">
+            <div class="p-4 bg-dark text-white rounded shadow-sm">
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Compliance Standard</h6>
@@ -98,7 +96,7 @@
 
 <footer class="footer mt-auto py-3 bg-white border-top">
     <div class="container text-center">
-        <span class="text-muted small">NarrativeIQ - AI Quality Assurance for Pharmacovigilance | Built by drbipinbhagath</span>
+        <span class="text-muted small">NarrativeIQ - AI Quality Assurance for Pharmacovigilance | Built by <a href="https://www.linkedin.com/in/drbipinchandrabhagath/" class="text-decoration-none text-primary fw-bold" target="_blank">drbipinbhagath</a></span>
     </div>
 </footer>
 
