@@ -1,0 +1,176 @@
+/* NarrativeIQ - style.css
+   Custom styles for PV ICSR Quality Checker
+   Author: drbipinbhagath | License: MIT */
+
+/* ── Body & Base ─────────────────────────────────── */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Navbar ──────────────────────────────────────── */
+.navbar-brand {
+    font-size: 1.3rem;
+    letter-spacing: -0.3px;
+}
+
+/* ── Score Circle ────────────────────────────────── */
+.score-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.score-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 0.7rem;
+    opacity: 0.85;
+}
+
+/* ── Stat Boxes ──────────────────────────────────── */
+.stat-box {
+    padding: 8px 4px;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Narrative Input Textarea ────────────────────── */
+.narrative-input {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    background-color: #fdfdfd;
+    border: 2px solid #dee2e6;
+    transition: border-color 0.2s ease;
+}
+
+.narrative-input:focus {
+    border-color: #0d6efd;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+/* ── Narrative Preview ───────────────────────────── */
+.narrative-preview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* ── Cards ───────────────────────────────────────── */
+.card {
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    font-size: 0.95rem;
+}
+
+/* ── Tables ──────────────────────────────────────── */
+.table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.table td {
+    font-size: 0.88rem;
+    vertical-align: middle;
+}
+
+/* ── Badge Tweaks ────────────────────────────────── */
+.badge {
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* ── Progress Bar ────────────────────────────────── */
+.progress {
+    border-radius: 50px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 50px;
+    transition: width 0.8s ease;
+}
+
+/* ── Hero Section ────────────────────────────────── */
+.hero-section {
+    border-left: 4px solid #0d6efd;
+}
+
+/* ── Grade Badge Sizes ───────────────────────────── */
+.badge.fs-6 {
+    font-size: 1.1rem !important;
+    padding: 6px 12px;
+}
+
+/* ── List Group Items ────────────────────────────── */
+.list-group-item {
+    font-size: 0.88rem;
+    padding: 8px 14px;
+}
+
+/* ── Print Styles ────────────────────────────────── */
+@media print {
+    .navbar, footer, .btn, form {
+        display: none !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    body {
+        background: white;
+    }
+}
+
+/* ── Responsive Tweaks ───────────────────────────── */
+@media (max-width: 768px) {
+    .score-circle {
+        width: 70px;
+        height: 70px;
+    }
+    .score-number {
+        font-size: 1.4rem;
+    }
+    .stat-number {
+        font-size: 1.2rem;
+    }
+}
