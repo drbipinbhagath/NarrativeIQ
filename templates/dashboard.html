@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NarrativeIQ - QC Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-shield-check me-2"></i>NarrativeIQ
+        </a>
+        <span class="navbar-text text-white-50 small">QC Analytics Dashboard</span>
+        <div class="ms-auto">
+            <a href="/" class="btn btn-outline-light btn-sm me-2">
+                <i class="bi bi-plus-circle me-1"></i>New Check
+            </a>
+            <a href="/history" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-clock-history me-1"></i>History
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-bar-chart-line me-2 text-primary"></i>QC Analytics Dashboard</h4>
+        <span class="badge bg-primary">{{ stats.total_cases }} Cases Analysed</span>
+    </div>
+
+    <!-- KPI Cards Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-primary"><i class="bi bi-files"></i></div>
+                    <div class="kpi-number">{{ stats.total_cases }}</div>
+                    <div class="kpi-label">Total Cases Checked</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-success"><i class="bi bi-graph-up"></i></div>
+                    <div class="kpi-number text-success">{{ stats.avg_score }}</div>
+                    <div class="kpi-label">Average QC Score</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-warning"><i class="bi bi-trophy"></i></div>
+                    <div class="kpi-number text-warning">{{ stats.grade_a_count }}</div>
+                    <div class="kpi-label">Grade A Cases</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div class="kpi-number text-danger">{{ stats.fail_count }}</div>
+                    <div class="kpi-label">Cases Needing Review</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+
+        <!-- Line Chart: Score Trend Over Time -->
+        <div class="col-md-8 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-graph-up me-2 text-primary"></i>QC Score Trend Over Time
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pie Chart: Grade Distribution -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-pie-chart me-2 text-success"></i>Grade Distribution
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="gradeChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+
+        <!-- Bar Chart: Most Frequently Missing Elements -->
+        <div class="col-md-7 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-bar-chart me-2 text-danger"></i>Most Frequently Missing Elements
+                </div>
+                <div class="card-body">
+                    <canvas id="missingChart" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Distribution Histogram -->
+        <div class="col-md-5 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-distribute-horizontal me-2 text-warning"></i>Score Distribution
+                </div>
+                <div class="card-body">
+                    <canvas id="histChart" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Cases Table -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-white fw-semibold">
+            <i class="bi bi-table me-2 text-primary"></i>Recent Cases
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Case ID</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Passed</th>
+                        <th>Failed</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in recent_cases %}
+                    <tr>
+                        <td class="fw-semibold">{{ case.case_id }}</td>
+                        <td>
+                            <div class="progress" style="height:8px; width:80px; display:inline-block; vertical-align:middle;">
+                                <div class="progress-bar {% if case.score >= 80 %}bg-success{% elif case.score >= 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width:{{ case.score }}%"></div>
+                            </div>
+                            <span class="ms-2 small">{{ case.score }}</span>
+                        </td>
+                        <td>
+                            <span class="badge {% if case.grade == 'A' %}bg-success{% elif case.grade == 'B' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ case.grade }}
+                            </span>
+                        </td>
+                        <td class="text-success fw-semibold">{{ case.passed }}</td>
+                        <td class="text-danger fw-semibold">{{ case.failed }}</td>
+                        <td class="text-muted small">{{ case.created_at }}</td>
+                        <td><a href="/history" class="btn btn-outline-primary btn-sm">View</a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">No cases checked yet. <a href="/">Run your first check.</a></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const trendLabels = {{ trend_labels | tojson }};
+const trendScores = {{ trend_scores | tojson }};
+const gradeLabels = {{ grade_labels | tojson }};
+const gradeCounts = {{ grade_counts | tojson }};
+const missingLabels = {{ missing_labels | tojson }};
+const missingCounts = {{ missing_counts | tojson }};
+const histLabels = ['0-20', '21-40', '41-60', '61-80', '81-100'];
+const histData = {{ hist_data | tojson }};
+
+// --- Trend Line Chart ---
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: trendLabels,
+        datasets: [{
+            label: 'QC Score',
+            data: trendScores,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13,110,253,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: trendScores.map(s => s >= 80 ? '#198754' : s >= 60 ? '#ffc107' : '#dc3545'),
+            pointRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { min: 0, max: 100, ticks: { callback: v => v + '/100' } }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => 'Score: ' + ctx.raw + '/100' } }
+        }
+    }
+});
+
+// --- Grade Pie Chart ---
+new Chart(document.getElementById('gradeChart'), {
+    type: 'pie',
+    data: {
+        labels: gradeLabels,
+        datasets: [{
+            data: gradeCounts,
+            backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#dc3545'],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+    }
+});
+
+// --- Missing Elements Bar ---
+new Chart(document.getElementById('missingChart'), {
+    type: 'bar',
+    data: {
+        labels: missingLabels,
+        datasets: [{
+            label: 'Times Missing',
+            data: missingCounts,
+            backgroundColor: '#dc3545',
+            borderRadius: 4
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        scales: {
+            x: { ticks: { stepSize: 1 } },
+            y: { ticks: { font: { size: 10 } } }
+        },
+        plugins: { legend: { display: false } }
+    }
+});
+
+// --- Score Distribution Histogram ---
+new Chart(document.getElementById('histChart'), {
+    type: 'bar',
+    data: {
+        labels: histLabels,
+        datasets: [{
+            label: 'Cases',
+            data: histData,
+            backgroundColor: ['#dc3545','#fd7e14','#ffc107','#20c997','#198754'],
+            borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { ticks: { stepSize: 1 }, title: { display: true, text: 'Cases' } },
+            x: { title: { display: true, text: 'Score Range' } }
+        },
+        plugins: { legend: { display: false } }
+    }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
