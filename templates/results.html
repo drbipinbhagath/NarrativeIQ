@@ -7,256 +7,302 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/static/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="/">
-      <i class="bi bi-shield-check me-2"></i>NarrativeIQ
-    </a>
-    <span class="navbar-text text-white-50 small">QC Results</span>
-    <div class="ms-auto">
-      <a href="/" class="btn btn-outline-light btn-sm me-2">
-        <i class="bi bi-plus me-1"></i>New Check
-      </a>
-      <a href="/history" class="btn btn-outline-light btn-sm">
-        <i class="bi bi-clock-history me-1"></i>History
-      </a>
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-shield-check me-2"></i>NarrativeIQ
+        </a>
+        <span class="navbar-text text-white-50 small">QC Results</span>
+        <div class="ms-auto">
+            <a href="/" class="btn btn-outline-light btn-sm me-2">
+                <i class="bi bi-plus-circle me-1"></i>New Check
+            </a>
+            <a href="/history" class="btn btn-outline-light btn-sm me-2">
+                <i class="bi bi-clock-history me-1"></i>History
+            </a>
+            <a href="/dashboard" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-bar-chart-line me-1"></i>Dashboard
+            </a>
+        </div>
     </div>
-  </div>
 </nav>
 
 <div class="container mt-4">
 
-  <!-- Score Header Card -->
-  <div class="card shadow mb-4 border-{{ results.grade_class }}">
-    <div class="card-body">
-      <div class="row align-items-center">
-        <div class="col-md-2 text-center">
-          <div class="score-circle bg-{{ results.grade_class }} text-white">
-            <div class="score-number">{{ results.overall_score }}</div>
-            <div class="score-label">/ 100</div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <h2 class="fw-bold text-{{ results.grade_class }} mb-1">
-            Grade {{ results.grade }} &mdash; {{ results.grade_label }}
-          </h2>
-          <p class="text-muted mb-1">
-            <strong>Case ID:</strong> {{ case_id }}
-            {% if product_name %}
-            &nbsp;&nbsp;|&nbsp;&nbsp;<strong>Product:</strong> {{ product_name }}
-            {% endif %}
-          </p>
-          <div class="progress mt-2" style="height: 12px;">
-            <div class="progress-bar bg-{{ results.grade_class }}"
-                 role="progressbar"
-                 style="width: {{ results.overall_score }}%">
+    <!-- Score Header -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="score-circle {% if result.score >= 80 %}score-a{% elif result.score >= 60 %}score-b{% else %}score-fail{% endif %}">
+                        <span class="score-number">{{ result.score }}</span>
+                        <span class="score-denom">/100</span>
+                    </div>
+                </div>
+                <div class="col">
+                    <h2 class="mb-1 {% if result.score >= 80 %}text-success{% elif result.score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                        Grade {{ result.grade }} &mdash; {{ result.grade_label }}
+                    </h2>
+                    <p class="text-muted mb-2">Case ID: {{ result.case_id }}</p>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar {% if result.score >= 80 %}bg-success{% elif result.score >= 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                             style="width: {{ result.score }}%"></div>
+                    </div>
+                </div>
+                <div class="col-auto text-center">
+                    <div class="stat-box">
+                        <div class="stat-number text-success">{{ result.passed }}</div>
+                        <div class="stat-label">PASSED</div>
+                    </div>
+                </div>
+                <div class="col-auto text-center">
+                    <div class="stat-box">
+                        <div class="stat-number text-danger">{{ result.failed }}</div>
+                        <div class="stat-label">FAILED</div>
+                    </div>
+                </div>
+                <div class="col-auto text-center">
+                    <div class="stat-box">
+                        <div class="stat-number text-primary">{{ result.total }}</div>
+                        <div class="stat-label">TOTAL</div>
+                    </div>
+                </div>
             </div>
-          </div>
+        </div>
+    </div>
+
+    <!-- DATA VISUALISATION ROW -->
+    <div class="row mb-4">
+
+        <!-- Radar Chart - Element Coverage -->
+        <div class="col-md-5 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-hexagon me-2 text-primary"></i>Element Coverage Radar
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="radarChart" height="260"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doughnut Chart - Pass/Fail -->
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-pie-chart me-2 text-success"></i>Pass / Fail Ratio
+                </div>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <canvas id="doughnutChart" height="200"></canvas>
+                    <div class="mt-2 text-center small">
+                        <span class="badge bg-success me-1">{{ result.passed }} Passed</span>
+                        <span class="badge bg-danger">{{ result.failed }} Failed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horizontal Bar - Element Scores -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-bar-chart-horizontal me-2 text-warning"></i>Element Score Breakdown
+                </div>
+                <div class="card-body">
+                    <canvas id="barChart" height="240"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Passed Checks -->
+    {% if result.checks_passed %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white fw-semibold">
+            <i class="bi bi-check-circle me-2"></i>Passed Checks ({{ result.passed }})
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Element</th>
+                        <th>Status</th>
+                        <th>GVP Reference</th>
+                        <th>ICH Reference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for check in result.checks_passed %}
+                    <tr>
+                        <td><i class="bi bi-check-circle-fill text-success me-2"></i>{{ check.element }}</td>
+                        <td><span class="badge bg-success">Present</span></td>
+                        <td class="text-muted small">{{ check.gvp_ref }}</td>
+                        <td class="text-muted small">{{ check.ich_ref }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Missing Elements -->
+    {% if result.checks_failed %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white fw-semibold">
+            <i class="bi bi-exclamation-triangle me-2"></i>Missing Elements ({{ result.failed }}) &mdash; Action Required
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Missing Element</th>
+                        <th>Impact</th>
+                        <th>GVP Reference</th>
+                        <th>ICH Reference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for check in result.checks_failed %}
+                    <tr class="table-danger">
+                        <td><i class="bi bi-x-circle-fill text-danger me-2"></i>{{ check.element }}</td>
+                        <td class="small">{{ check.impact }}</td>
+                        <td class="text-muted small">{{ check.gvp_ref }}</td>
+                        <td class="text-muted small">{{ check.ich_ref }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Submitted Narrative -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">
+            <i class="bi bi-file-text me-2"></i>Submitted Narrative
+        </div>
+        <div class="card-body">
+            <pre class="narrative-text">{{ result.narrative }}</pre>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <a href="/" class="btn btn-primary w-100 mb-2">
+                <i class="bi bi-arrow-left me-2"></i>Check Another Narrative
+            </a>
         </div>
         <div class="col-md-4">
-          <div class="row text-center">
-            <div class="col-4">
-              <div class="stat-box">
-                <div class="stat-number text-success">{{ results.passed_checks }}</div>
-                <div class="stat-label">Passed</div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="stat-box">
-                <div class="stat-number text-danger">{{ results.failed_checks }}</div>
-                <div class="stat-label">Failed</div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="stat-box">
-                <div class="stat-number text-primary">{{ results.total_checks }}</div>
-                <div class="stat-label">Total</div>
-              </div>
-            </div>
-          </div>
+            <a href="/history" class="btn btn-outline-secondary w-100 mb-2">
+                <i class="bi bi-clock-history me-2"></i>View Audit History
+            </a>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-
-    <!-- Left: Passed and Failed Elements -->
-    <div class="col-lg-8">
-
-      <!-- Passed Checks -->
-      {% if results.findings %}
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-success text-white">
-          <h6 class="mb-0">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            Passed Checks ({{ results.findings|length }})
-          </h6>
+        <div class="col-md-4">
+            <button onclick="window.print()" class="btn btn-outline-dark w-100 mb-2">
+                <i class="bi bi-printer me-2"></i>Print / Save as PDF
+            </button>
         </div>
-        <div class="card-body p-0">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Element</th>
-                <th>Status</th>
-                <th>GVP Reference</th>
-                <th>ICH Reference</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in results.findings %}
-              <tr>
-                <td><i class="bi bi-check-circle text-success me-2"></i>{{ item.element }}</td>
-                <td><span class="badge bg-success">Present</span></td>
-                <td><small class="text-muted">{{ item.gvp_ref }}</small></td>
-                <td><small class="text-muted">{{ item.ich_ref }}</small></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Failed / Missing Checks -->
-      {% if results.missing_elements %}
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-danger text-white">
-          <h6 class="mb-0">
-            <i class="bi bi-x-circle-fill me-2"></i>
-            Missing Elements ({{ results.missing_elements|length }}) &mdash; Action Required
-          </h6>
-        </div>
-        <div class="card-body p-0">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Missing Element</th>
-                <th>Impact</th>
-                <th>GVP Reference</th>
-                <th>ICH Reference</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in results.missing_elements %}
-              <tr class="table-danger">
-                <td><i class="bi bi-x-circle text-danger me-2"></i>{{ item.element }}</td>
-                <td><small>{{ item.impact }}</small></td>
-                <td><small class="text-muted">{{ item.gvp_ref }}</small></td>
-                <td><small class="text-muted">{{ item.ich_ref }}</small></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Warnings -->
-      {% if results.warnings %}
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-warning">
-          <h6 class="mb-0">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Warnings ({{ results.warnings|length }})
-          </h6>
-        </div>
-        <ul class="list-group list-group-flush">
-          {% for w in results.warnings %}
-          <li class="list-group-item list-group-item-warning">
-            <i class="bi bi-exclamation-circle me-2"></i>{{ w }}
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% endif %}
-
-      <!-- Narrative Preview -->
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white">
-          <h6 class="mb-0">
-            <i class="bi bi-file-text me-2 text-primary"></i>Submitted Narrative
-          </h6>
-        </div>
-        <div class="card-body">
-          <p class="narrative-preview">{{ narrative }}</p>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Right: Actions Panel -->
-    <div class="col-lg-4">
-
-      <!-- Action Buttons -->
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white">
-          <h6 class="mb-0"><i class="bi bi-tools me-2"></i>Actions</h6>
-        </div>
-        <div class="card-body d-grid gap-2">
-          <a href="/" class="btn btn-primary">
-            <i class="bi bi-arrow-left me-2"></i>Check Another Narrative
-          </a>
-          <a href="/history" class="btn btn-outline-secondary">
-            <i class="bi bi-clock-history me-2"></i>View Audit History
-          </a>
-          <button onclick="window.print()" class="btn btn-outline-dark">
-            <i class="bi bi-printer me-2"></i>Print / Save as PDF
-          </button>
-        </div>
-      </div>
-
-      <!-- Seriousness Markers -->
-      {% if results.seriousness_markers %}
-      <div class="card shadow-sm mb-3 border-danger">
-        <div class="card-header bg-danger text-white">
-          <h6 class="mb-0">
-            <i class="bi bi-exclamation-octagon-fill me-2"></i>
-            Seriousness Alert
-          </h6>
-        </div>
-        <div class="card-body">
-          <p class="small mb-2">The following seriousness markers were detected in the narrative:</p>
-          {% for marker in results.seriousness_markers %}
-          <span class="badge bg-danger me-1 mb-1">{{ marker }}</span>
-          {% endfor %}
-          <p class="small text-muted mt-2 mb-0">
-            Verify that the seriousness checkbox in the case is correctly ticked.
-          </p>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Summary Box -->
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>QC Summary</h6>
-        </div>
-        <div class="card-body small">
-          <table class="table table-sm mb-0">
-            <tr><td class="text-muted">Case ID</td><td class="fw-semibold">{{ case_id }}</td></tr>
-            <tr><td class="text-muted">Product</td><td>{{ product_name or 'Not specified' }}</td></tr>
-            <tr><td class="text-muted">Score</td><td class="fw-bold text-{{ results.grade_class }}">{{ results.overall_score }}/100</td></tr>
-            <tr><td class="text-muted">Grade</td><td><span class="badge bg-{{ results.grade_class }}">{{ results.grade }}</span></td></tr>
-            <tr><td class="text-muted">Passed</td><td class="text-success fw-semibold">{{ results.passed_checks }}/{{ results.total_checks }}</td></tr>
-          </table>
-        </div>
-      </div>
-
-    </div>
-  </div>
 </div>
 
-<!-- Footer -->
-<footer class="mt-5 py-3 bg-light border-top">
-  <div class="container text-center text-muted small">
-    <strong>NarrativeIQ</strong> &mdash; 100% Local &mdash; No data leaves your machine.
-  </div>
-</footer>
+<!-- Chart.js Scripts -->
+<script>
+const passed = {{ result.passed }};
+const failed = {{ result.failed }};
+const checksData = {{ result.checks_passed | tojson }};
+const failedData = {{ result.checks_failed | tojson }};
+
+// --- Doughnut Chart: Pass/Fail ---
+const dCtx = document.getElementById('doughnutChart').getContext('2d');
+new Chart(dCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Passed', 'Failed'],
+        datasets: [{
+            data: [passed, failed],
+            backgroundColor: ['#198754', '#dc3545'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 11 } } }
+        },
+        cutout: '65%'
+    }
+});
+
+// --- Radar Chart: Element Coverage ---
+const allElements = [...checksData, ...failedData];
+const radarLabels = allElements.map(c => c.element.length > 18 ? c.element.substring(0,18)+'...' : c.element);
+const radarScores = allElements.map(c => checksData.includes(c) ? 100 : 0);
+
+const rCtx = document.getElementById('radarChart').getContext('2d');
+new Chart(rCtx, {
+    type: 'radar',
+    data: {
+        labels: radarLabels,
+        datasets: [{
+            label: 'Element Present',
+            data: radarScores,
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            borderColor: '#198754',
+            borderWidth: 2,
+            pointBackgroundColor: radarScores.map(s => s === 100 ? '#198754' : '#dc3545'),
+            pointRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            r: {
+                min: 0, max: 100,
+                ticks: { display: false },
+                pointLabels: { font: { size: 9 } }
+            }
+        },
+        plugins: { legend: { display: false } }
+    }
+});
+
+// --- Horizontal Bar Chart: Element Scores ---
+const barLabels = allElements.map(c => c.element.length > 22 ? c.element.substring(0,22)+'...' : c.element);
+const barValues = allElements.map(c => checksData.includes(c) ? 100 : 0);
+const barColors = barValues.map(v => v === 100 ? '#198754' : '#dc3545');
+
+const bCtx = document.getElementById('barChart').getContext('2d');
+new Chart(bCtx, {
+    type: 'bar',
+    data: {
+        labels: barLabels,
+        datasets: [{
+            label: 'Score',
+            data: barValues,
+            backgroundColor: barColors,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        scales: {
+            x: { min: 0, max: 100, ticks: { callback: v => v+'%' } },
+            y: { ticks: { font: { size: 9 } } }
+        },
+        plugins: { legend: { display: false } }
+    }
+});
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
