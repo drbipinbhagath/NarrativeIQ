@@ -8,217 +8,98 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/static/style.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
 <!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="/">
-      <i class="bi bi-shield-check me-2"></i>NarrativeIQ
-    </a>
-    <span class="navbar-text text-white-50 small">ICSR Narrative Quality Checker | GVP Module VI</span>
-    <div class="ms-auto">
-      <a href="/history" class="btn btn-outline-light btn-sm">
-        <i class="bi bi-clock-history me-1"></i>Audit History
-      </a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-shield-check me-2"></i>NarrativeIQ
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="/"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/history"><i class="bi bi-clock-history me-1"></i>Audit History</a></li>
+                <li class="nav-item"><a class="nav-link text-info fw-bold" href="/dashboard"><i class="bi bi-graph-up me-1"></i>Analytics Dashboard</a></li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
-<!-- Hero Section -->
-<div class="hero-section py-4 bg-light border-bottom">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-8">
-        <h1 class="h3 fw-bold text-primary mb-1">
-          <i class="bi bi-file-earmark-medical me-2"></i>
-          ICSR Narrative Quality Checker
-        </h1>
-        <p class="text-muted mb-0">
-          Paste your case narrative below. NarrativeIQ checks it against
-          <strong>10 GVP Module VI / ICH E2B(R3)</strong> mandatory elements
-          and returns a quality score in seconds.
-        </p>
-      </div>
-      <div class="col-md-4 text-end">
-        <div class="badge-group">
-          <span class="badge bg-success me-1">100% Local</span>
-          <span class="badge bg-info me-1">Offline</span>
-          <span class="badge bg-warning text-dark">GVP VI</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Main Form -->
 <div class="container mt-4">
-  <div class="row">
-
-    <!-- Input Form -->
-    <div class="col-lg-8">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="mb-0">
-            <i class="bi bi-pencil-square me-2 text-primary"></i>
-            Enter Case Narrative
-          </h5>
+    <div class="row">
+        <!-- Checker Form -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>
+                        New ICSR Quality Check
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/check" method="POST">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">CASE ID</label>
+                                <input type="text" name="case_id" class="form-control form-control-lg border-2" placeholder="CASE-001" value="CASE-001" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">AGENCY FORMAT</label>
+                                <select name="agency" class="form-select form-select-lg border-2">
+                                    <option value="EMA">EMA (GVP Module VI)</option>
+                                    <option value="FDA">FDA (CFR 312.32)</option>
+                                    <option value="MHRA">MHRA (UK PV)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">CASE NARRATIVE TEXT</label>
+                            <textarea name="narrative" class="form-control border-2 shadow-none" rows="10" 
+                                placeholder="Paste ICSR narrative here..." required
+                                style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 0.95rem;"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
+                                <i class="bi bi-play-fill me-2"></i>Run Quality Check
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary px-4">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-          <form action="/check" method="POST">
-
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Case ID</label>
-                <input type="text" name="case_id" class="form-control"
-                       placeholder="e.g. CASE-2024-001" value="CASE-001">
-                <div class="form-text">Used for audit trail tracking</div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Suspect Product Name</label>
-                <input type="text" name="product_name" class="form-control"
-                       placeholder="e.g. Metformin, Atorvastatin">
-                <div class="form-text">Optional - checks product mention in text</div>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-semibold">
-                Case Narrative Text
-                <span class="text-danger">*</span>
-              </label>
-              <textarea name="narrative" class="form-control narrative-input"
-                        rows="12" required
-                        placeholder="Paste your ICSR narrative here...
-
-Example:
-A 45-year-old male patient was prescribed Metformin 500mg orally twice daily for Type 2 Diabetes Mellitus. Approximately 3 days after initiation, the patient developed nausea, vomiting, and abdominal discomfort. The adverse event was assessed as possibly related to Metformin by the treating physician. The drug was discontinued and the patient recovered fully within 5 days. The event was considered non-serious. Reported by a healthcare professional via spontaneous report."></textarea>
-              <div class="form-text">
-                <i class="bi bi-info-circle me-1"></i>
-                Minimum recommended length: 50 words. Supports English language narratives.
-              </div>
-            </div>
-
-            <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-primary btn-lg">
-                <i class="bi bi-search me-2"></i>Run Quality Check
-              </button>
-              <button type="reset" class="btn btn-outline-secondary btn-lg">
-                <i class="bi bi-arrow-counterclockwise me-2"></i>Clear
-              </button>
-            </div>
-
-          </form>
-        </div>
-      </div>
     </div>
 
-    <!-- Info Panel -->
-    <div class="col-lg-4">
-
-      <!-- What NarrativeIQ checks -->
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-primary text-white">
-          <h6 class="mb-0">
-            <i class="bi bi-list-check me-2"></i>
-            What NarrativeIQ Checks
-          </h6>
+    <!-- Quick Help / Compliance Guide -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 bg-dark text-white shadow-sm p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Compliance Standard</h6>
+                        <p class="small text-white-50 mb-0">
+                            NarrativeIQ validates narratives against <strong>GVP Module VI.C.2.2.3</strong> and <strong>ICH E2B(R3) Section E.i</strong>. 
+                            The system checks for 10 mandatory clinical elements required for high-quality ICSR submission.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-success">v1.2 Stable</span>
+                        <span class="badge bg-info">100% Offline</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body p-0">
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-person me-2 text-primary"></i>
-              Patient Demographics
-              <span class="ms-auto badge bg-light text-dark">GVP VI</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-capsule me-2 text-primary"></i>
-              Suspect Drug Details
-              <span class="ms-auto badge bg-light text-dark">E2B</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-activity me-2 text-danger"></i>
-              Adverse Event Description
-              <span class="ms-auto badge bg-light text-dark">GVP VI</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-rulers me-2 text-primary"></i>
-              Dose and Route
-              <span class="ms-auto badge bg-light text-dark">E2B</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-calendar-event me-2 text-primary"></i>
-              Onset Date / Time
-              <span class="ms-auto badge bg-light text-dark">E2B</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-check-circle me-2 text-success"></i>
-              Event Outcome
-              <span class="ms-auto badge bg-light text-dark">GVP VI</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-link-45deg me-2 text-warning"></i>
-              Causality Assessment
-              <span class="ms-auto badge bg-light text-dark">GVP VI</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-person-badge me-2 text-primary"></i>
-              Reporter Details
-              <span class="ms-auto badge bg-light text-dark">GVP VI</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
-              Seriousness Criteria
-              <span class="ms-auto badge bg-light text-dark">ICH E2A</span>
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-arrow-repeat me-2 text-primary"></i>
-              Action Taken with Drug
-              <span class="ms-auto badge bg-light text-dark">E2B</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Grading System -->
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h6 class="mb-0">
-            <i class="bi bi-award me-2 text-warning"></i>
-            Quality Grading
-          </h6>
-        </div>
-        <div class="card-body small">
-          <div class="d-flex align-items-center mb-2">
-            <span class="badge bg-success me-2 fs-6">A</span>
-            <div>90-100% &mdash; Submission Ready</div>
-          </div>
-          <div class="d-flex align-items-center mb-2">
-            <span class="badge bg-info me-2 fs-6">B</span>
-            <div>70-89% &mdash; Good, Minor Issues</div>
-          </div>
-          <div class="d-flex align-items-center mb-2">
-            <span class="badge bg-warning text-dark me-2 fs-6">C</span>
-            <div>50-69% &mdash; Requires QC Review</div>
-          </div>
-          <div class="d-flex align-items-center">
-            <span class="badge bg-danger me-2 fs-6">D</span>
-            <div>&lt;50% &mdash; Major Rework Needed</div>
-          </div>
-        </div>
-      </div>
-
     </div>
-  </div>
 </div>
 
-<!-- Footer -->
-<footer class="mt-5 py-3 bg-light border-top">
-  <div class="container text-center text-muted small">
-    <strong>NarrativeIQ</strong> &mdash; Local AI-Powered ICSR Quality Checker &mdash;
-    Built by <a href="https://github.com/drbipinbhagath" class="text-decoration-none">drbipinbhagath</a> &mdash;
-    MIT License &mdash; 100% Offline &mdash; No data leaves your machine.
-  </div>
+<footer class="footer mt-auto py-3 bg-white border-top">
+    <div class="container text-center">
+        <span class="text-muted small">NarrativeIQ - AI Quality Assurance for Pharmacovigilance | Built by drbipinbhagath</span>
+    </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
